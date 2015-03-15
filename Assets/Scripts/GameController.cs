@@ -54,6 +54,15 @@ public class GameController : MonoBehaviour {
 			}
 			zombies.Add (z);
 		}
+		/*
+		Casual c = Instantiate (casual , new Vector3 (3.5f, 0,17.5f),Quaternion.identity) as Casual;
+		
+		Shambler s = Instantiate (shambler , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Shambler;
+
+		zombies.Add (c);
+		zombies.Add (s);
+
+*/
 	}
 	
 	// Update is called once per frame

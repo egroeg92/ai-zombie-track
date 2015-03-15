@@ -8,7 +8,7 @@ public abstract class Zombie : MonoBehaviour {
 	Modern modern;
 	Phone phone;
 
-	GameController game;
+	protected GameController game;
 	GameObject  ilt,mlt,olt,
 				irt,mrt,ort,
 				ilb,mlb,olb,
@@ -23,8 +23,8 @@ public abstract class Zombie : MonoBehaviour {
 	int spawnProb;
 	int ratio;
 	bool easy;
-	protected Lane lane;
-	protected Side side;
+	public Lane lane;
+	public Side side;
 	// Use this for initialization
 	protected void Start () {
 		game = GameObject.Find("Level").GetComponent<GameController> ();
@@ -384,6 +384,12 @@ public abstract class Zombie : MonoBehaviour {
 
 		if ((int)lane == 2)
 			return false;
+		foreach (Zombie z in game.zombies) {
+			if(z == this)
+				continue;
+			if( Vector3.Distance(transform.position, z.transform.position) < 2 && (int)z.lane == (int)lane+1)
+				return false;
+		}
 		lane += 1;
 
 		switch (side) {
@@ -412,6 +418,13 @@ public abstract class Zombie : MonoBehaviour {
 
 		if ((int)lane == 0)
 			return false;
+		foreach (Zombie z in game.zombies) {
+			if(z == this)
+				continue;
+			if( Vector3.Distance(transform.position, z.transform.position) < 2 && (int)z.lane == (int)lane-1)
+				return false;
+		}
+
 		lane -= 1;
 
 		switch (side) {
