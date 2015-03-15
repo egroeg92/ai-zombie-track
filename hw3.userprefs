@@ -1,0 +1,18 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Shambler.cs">
+    <Files>
+      <File FileName="Assets\Scripts\Zombie.cs" Line="22" Column="24" />
+      <File FileName="Assets\Scripts\Shambler.cs" Line="15" Column="18" />
+      <File FileName="Assets\Scripts\Phone.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Modern.cs" Line="17" Column="3" />
+      <File FileName="Assets\Scripts\GameController.cs" Line="8" Column="21" />
+      <File FileName="Assets\Scripts\Casual.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Enums.cs" Line="7" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
