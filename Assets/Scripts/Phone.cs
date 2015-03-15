@@ -14,4 +14,8 @@ public class Phone : Zombie {
 		base.Update ();
 
 	}
+
+	protected override void avoidCollision(){
+		
+	}
 }

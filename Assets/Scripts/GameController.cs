@@ -19,8 +19,11 @@ public class GameController : MonoBehaviour {
 	irt,mrt,ort,
 	ilb,mlb,olb,
 	irb,mrb,orb;
+
+	public ArrayList zombies;
 	// Use this for initialization
 	void Start () {
+		zombies = new ArrayList ();
 		ilt = GameObject.FindGameObjectWithTag ("innerLT");
 		mlt = GameObject.FindGameObjectWithTag ("midLT");
 		olt = GameObject.FindGameObjectWithTag ("outterLT");
@@ -41,7 +44,7 @@ public class GameController : MonoBehaviour {
 		for (int i = 0; i < numberOfZombies; i++) {
 			Zombie z;
 
-			if (Random.Range (-1, 1) > 0) {
+			if (Random.Range (0, 1f) > 0.5f) {
 				z = Instantiate (casual) as Casual;
 				z.setStartPosition();
 			} else {
@@ -49,6 +52,7 @@ public class GameController : MonoBehaviour {
 				z.setStartPosition();
 
 			}
+			zombies.Add (z);
 		}
 	}
 	

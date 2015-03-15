@@ -14,4 +14,8 @@ public class Casual : Zombie {
 		base.Update ();
 		
 	}
+
+	protected override void avoidCollision(){
+
+	}
 }

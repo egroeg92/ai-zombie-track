@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Zombie : MonoBehaviour {
+public abstract class Zombie : MonoBehaviour {
 
 	Casual casual;
 	Shambler shambler;
@@ -23,8 +23,8 @@ public class Zombie : MonoBehaviour {
 	int spawnProb;
 	int ratio;
 	bool easy;
-	public Lane lane;
-	public Side side;
+	protected Lane lane;
+	protected Side side;
 	// Use this for initialization
 	protected void Start () {
 		game = GameObject.Find("Level").GetComponent<GameController> ();
@@ -65,11 +65,7 @@ public class Zombie : MonoBehaviour {
 		corners [10] = mrb;
 		corners [11] = orb;
 
-		//setStartPosition ();
 		setSide ();
-		Debug.Log (side);
-		Debug.Log (lane);
-
 		setGoal ();
 		
 	}
@@ -186,8 +182,6 @@ public class Zombie : MonoBehaviour {
 	}
 
 	void setGoal(){
-
-
 		switch (side) {
 			//left
 		case(Side.LEFT):
@@ -283,10 +277,7 @@ public class Zombie : MonoBehaviour {
 
 	// Update is called once per frame
 	protected void Update () {
-
 		FSM ();
-	
-
 	}
 	void spawnNew(){
 		int easies = game.easies;
@@ -298,6 +289,7 @@ public class Zombie : MonoBehaviour {
 			startCorner = (corners [Random.Range (0, corners.Length)]);
 		Vector3 start = startCorner.transform.position;
 		Zombie z;
+		Debug.Log (ratio);
 		if (ratio == 0) {
 			if(Random.Range (0, 2) == 1){
 				z = Instantiate(casual,start,Quaternion.identity)as Casual;
@@ -323,6 +315,8 @@ public class Zombie : MonoBehaviour {
 				z = Instantiate(shambler,start,Quaternion.identity)as Shambler;
 			}
 		}
+		game.zombies.Add (z);
+		game.zombies.Remove (this);
 	}
 
 	protected void FSM(){
@@ -385,6 +379,63 @@ public class Zombie : MonoBehaviour {
 		else
 			game.hards += 1;
 	}
+
+	protected bool shiftLaneUp(){
+
+		if ((int)lane == 2)
+			return false;
+		lane += 1;
+
+		switch (side) {
+		case(Side.LEFT):
+			transform.position -= Vector3.right;
+			break;
+		case(Side.BOTTOM):
+			transform.position -= Vector3.forward;
+			break;
+		case(Side.RIGHT):
+			transform.position += Vector3.right;
+			break;
+		case(Side.TOP):
+			transform.position += Vector3.forward;
+			break;
+		default:
+			break;
+		}
+		setGoal ();
+		
+		return true;
+
+		
+	}
+	protected bool shiftLaneDown(){
+
+		if ((int)lane == 0)
+			return false;
+		lane -= 1;
+
+		switch (side) {
+		case(Side.LEFT):
+			transform.position += Vector3.right;
+			break;
+		case(Side.BOTTOM):
+			transform.position += Vector3.forward;
+			break;
+		case(Side.RIGHT):
+			transform.position -= Vector3.right;
+			break;
+		case(Side.TOP):
+			transform.position -= Vector3.forward;
+			break;
+		default:
+			break;
+		}
+		setGoal ();
+		return true;
+
+		
+	}
+	protected abstract void avoidCollision();
 
 
 }

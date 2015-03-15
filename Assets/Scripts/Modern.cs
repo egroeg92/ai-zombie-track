@@ -16,4 +16,8 @@ public class Modern : Zombie {
 		base.Update ();
 
 	}
+
+	protected override void avoidCollision(){
+		
+	}
 }
