@@ -40,7 +40,6 @@ public class GameController : MonoBehaviour {
 		mrb = GameObject.FindGameObjectWithTag ("midRB");
 		orb = GameObject.FindGameObjectWithTag ("outterRB");
 
-
 		for (int i = 0; i < numberOfZombies; i++) {
 			Zombie z;
 
@@ -55,14 +54,26 @@ public class GameController : MonoBehaviour {
 			zombies.Add (z);
 		}
 		/*
-		Casual c = Instantiate (casual , new Vector3 (3.5f, 0,17.5f),Quaternion.identity) as Casual;
-		
-		Shambler s = Instantiate (shambler , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Shambler;
 
+		Casual c = Instantiate (casual , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Casual;
+		Casual c1 = Instantiate (casual , new Vector3 (2.5f, 0,2.5f),Quaternion.identity) as Casual;
+		Casual c2 = Instantiate (casual , new Vector3 (1.5f, 0,1.5f),Quaternion.identity) as Casual;
+
+		//Shambler s = Instantiate (shambler , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Shambler;
+		//Modern m = Instantiate (modern , new Vector3 (29.5f, 0,17.5f),Quaternion.identity) as Modern;
+
+		Phone p = Instantiate (phone, new Vector3 (29.5f, 0, 3.5f), Quaternion.identity) as Phone;
+		Phone p1 = Instantiate (phone, new Vector3 (30.5f, 0, 2.5f), Quaternion.identity) as Phone;
+		Phone p2 = Instantiate (phone, new Vector3 (31.5f, 0, 1.5f), Quaternion.identity) as Phone;
+
+		zombies.Add (p);
+		zombies.Add (p1);
+		zombies.Add (p2);
 		zombies.Add (c);
-		zombies.Add (s);
-
+		zombies.Add (c1);
+		zombies.Add (c2);
 */
+
 	}
 	
 	// Update is called once per frame

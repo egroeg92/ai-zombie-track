@@ -8,18 +8,19 @@ public abstract class Zombie : MonoBehaviour {
 	Modern modern;
 	Phone phone;
 
+	bool destroyFlag = false;
 	protected GameController game;
 	GameObject  ilt,mlt,olt,
 				irt,mrt,ort,
 				ilb,mlb,olb,
 				irb,mrb,orb;
 	GameObject[] corners;
-
+	protected ArrayList zombies;
 	public GameObject goalCorner;
 
-	protected Dirrection dir = Dirrection.CCW;
+	public Dirrection dir = Dirrection.CCW;
 
-	protected float speed = 1.0f;
+	public float speed = 1.0f;
 	int spawnProb;
 	int ratio;
 	bool easy;
@@ -181,7 +182,7 @@ public abstract class Zombie : MonoBehaviour {
 		}
 	}
 
-	void setGoal(){
+	protected void setGoal(){
 		switch (side) {
 			//left
 		case(Side.LEFT):
@@ -277,7 +278,22 @@ public abstract class Zombie : MonoBehaviour {
 
 	// Update is called once per frame
 	protected void Update () {
+		zombies = game.zombies;
 		FSM ();
+	}
+	void LateUpdate(){
+		if (destroyFlag) {
+			game.zombies.Remove (this);
+			Destroy (this.gameObject);
+			if(easy)
+				game.easies -= 1;
+			else
+				game.hards -= 1;
+			spawnNew();
+			
+
+			Destroy (this);
+		}
 	}
 	void spawnNew(){
 		int easies = game.easies;
@@ -289,7 +305,6 @@ public abstract class Zombie : MonoBehaviour {
 			startCorner = (corners [Random.Range (0, corners.Length)]);
 		Vector3 start = startCorner.transform.position;
 		Zombie z;
-		Debug.Log (ratio);
 		if (ratio == 0) {
 			if(Random.Range (0, 2) == 1){
 				z = Instantiate(casual,start,Quaternion.identity)as Casual;
@@ -316,7 +331,7 @@ public abstract class Zombie : MonoBehaviour {
 			}
 		}
 		game.zombies.Add (z);
-		game.zombies.Remove (this);
+
 	}
 
 	protected void FSM(){
@@ -359,14 +374,7 @@ public abstract class Zombie : MonoBehaviour {
 				setGoal ();
 			}
 			else{
-				Destroy (this.gameObject);
-				if(easy)
-					game.easies -= 1;
-				else
-					game.hards -= 1;
-				spawnNew();
-
-				//Destroy (this);
+				destroyFlag = true;
 
 			}
 		}
@@ -384,7 +392,7 @@ public abstract class Zombie : MonoBehaviour {
 
 		if ((int)lane == 2)
 			return false;
-		foreach (Zombie z in game.zombies) {
+		foreach (Zombie z in zombies) {
 			if(z == this)
 				continue;
 			if( Vector3.Distance(transform.position, z.transform.position) < 2 && (int)z.lane == (int)lane+1)
@@ -418,7 +426,7 @@ public abstract class Zombie : MonoBehaviour {
 
 		if ((int)lane == 0)
 			return false;
-		foreach (Zombie z in game.zombies) {
+		foreach (Zombie z in zombies) {
 			if(z == this)
 				continue;
 			if( Vector3.Distance(transform.position, z.transform.position) < 2 && (int)z.lane == (int)lane-1)

@@ -4,8 +4,7 @@ using System.Collections;
 public class Shambler : Zombie {
 
 	float shiftFrequency = .5f;
-	float nextShift = 0.5f;
-	static float shiftProbability = 1f;
+	float nextShift ;
 
 
 	float startTime;
@@ -15,6 +14,7 @@ public class Shambler : Zombie {
 		base.Start ();
 		base.setEasy (true);
 		speed = speed / 2;
+		nextShift = Time.time + shiftFrequency;
 
 		//InvokeRepeating("shiftLane",0, shiftFrequency);
 	}
@@ -29,9 +29,8 @@ public class Shambler : Zombie {
 		}
 		avoidCollision ();
 
-
-
 	}
+
 	void shiftLane(){
 		if (base.lane == Lane.INNER) {
 			base.shiftLaneUp ();
@@ -45,13 +44,11 @@ public class Shambler : Zombie {
 	}
 
 	protected override void avoidCollision(){
-		foreach (Zombie z in game.zombies) {
+		foreach (Zombie z in zombies) {
 			if(z == this)
 				continue;
 			if(Vector3.Distance(transform.position, z.transform.position) < 2.5f && lane == z.lane)
 				shiftLane();
-
-			Debug.Log(z.transform.position);
 
 		}
 	}
