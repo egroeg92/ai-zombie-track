@@ -31,25 +31,29 @@ public class Shambler : Zombie {
 
 	}
 
-	void shiftLane(){
+	bool shiftLane(){
 		if (base.lane == Lane.INNER) {
-			base.shiftLaneUp ();
+			return base.shiftLaneUp ();
 		} else if (base.lane == Lane.OUTTER) {
-			base.shiftLaneDown ();
+			return base.shiftLaneDown ();
 		} else if (Random.Range (0, 1f) < 0.5f) {
-			base.shiftLaneUp ();
+			return base.shiftLaneUp ();
 		} else {
-			base.shiftLaneDown ();
+			return base.shiftLaneDown ();
 		}
 	}
 
 	protected override void avoidCollision(){
+		
+
 		foreach (Zombie z in zombies) {
 			if(z == this)
 				continue;
-			if(Vector3.Distance(transform.position, z.transform.position) < 2.5f && lane == z.lane)
-				shiftLane();
+			if(Vector3.Distance(transform.position, z.transform.position) < 2.5f && lane == z.lane){
+				if(!shiftLane()){
 
+				}
+			}
 		}
 	}
 }

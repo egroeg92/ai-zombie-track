@@ -14,27 +14,41 @@ public class Modern : Zombie {
 	// Update is called once per frame
 	void Update () {
 		base.Update ();
+		
+		speed = 2 * game.speed;
 		avoidCollision ();
 
 	}
-	void shiftLane(){
+	bool shiftLane(){
+		bool shifted;
 		if (base.lane == Lane.INNER) {
-			base.shiftLaneUp ();
+			shifted = base.shiftLaneUp ();
 		} else if (base.lane == Lane.OUTTER) {
-			base.shiftLaneDown ();
+			shifted = base.shiftLaneDown ();
 		} else if (Random.Range (0, 1f) < 0.5f) {
-			base.shiftLaneUp ();
+			shifted = base.shiftLaneUp ();
 		} else {
-			base.shiftLaneDown ();
+			shifted = base.shiftLaneDown ();
 		}
+		return shifted;
 	}
 	protected override void avoidCollision(){
 		foreach (Zombie z in zombies) {
 			if(z == this)
 				continue;
-			if(Vector3.Distance(transform.position, z.transform.position) < 2.5f && lane == z.lane)
-				shiftLane();
-			
+
+			float dist = Vector3.Distance(transform.position, z.transform.position);
+
+			if(dist < 2 && lane == z.lane && (transform.position + (dist*forward) == z.transform.position) )
+			{
+				if(!shiftLane())
+				{
+					if( z.dir == dir){
+						if( z.speed <= 2 * game.speed)
+							speed = z.speed;
+					}
+				}
+			}
 		}
 	}
 }

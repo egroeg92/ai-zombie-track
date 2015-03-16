@@ -9,7 +9,7 @@ public class GameController : MonoBehaviour {
 
 
 	public int numberOfZombies;
-	public int easyToHardRatio;
+	public float easyToHardRatio;
 	public int respawnProbabilty;
 	public float speed;
 
@@ -43,36 +43,32 @@ public class GameController : MonoBehaviour {
 		for (int i = 0; i < numberOfZombies; i++) {
 			Zombie z;
 
-			if (Random.Range (0, 1f) > 0.5f) {
-				z = Instantiate (casual) as Casual;
-				z.setStartPosition();
+			if (Random.Range (0, 1f) > 0f) {
+				z = Instantiate (casual,Vector3.zero,Quaternion.identity) as Casual;
+				z.transform.position = setStartPosition(z);
+				z.name = i+" zomb";
 			} else {
-				z = Instantiate (shambler) as Shambler;
-				z.setStartPosition();
+				z = Instantiate (shambler,Vector3.zero,Quaternion.identity) as Shambler;
+
+				z.transform.position = setStartPosition(z);
 
 			}
-			zombies.Add (z);
+			//zombies.Add (z);
 		}
-		/*
 
+/*
 		Casual c = Instantiate (casual , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Casual;
 		Casual c1 = Instantiate (casual , new Vector3 (2.5f, 0,2.5f),Quaternion.identity) as Casual;
 		Casual c2 = Instantiate (casual , new Vector3 (1.5f, 0,1.5f),Quaternion.identity) as Casual;
 
-		//Shambler s = Instantiate (shambler , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Shambler;
-		//Modern m = Instantiate (modern , new Vector3 (29.5f, 0,17.5f),Quaternion.identity) as Modern;
+		Shambler s = Instantiate (shambler , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Shambler;
+		Modern m = Instantiate (modern , new Vector3 (29.5f, 0,17.5f),Quaternion.identity) as Modern;
 
 		Phone p = Instantiate (phone, new Vector3 (29.5f, 0, 3.5f), Quaternion.identity) as Phone;
 		Phone p1 = Instantiate (phone, new Vector3 (30.5f, 0, 2.5f), Quaternion.identity) as Phone;
 		Phone p2 = Instantiate (phone, new Vector3 (31.5f, 0, 1.5f), Quaternion.identity) as Phone;
-
-		zombies.Add (p);
-		zombies.Add (p1);
-		zombies.Add (p2);
-		zombies.Add (c);
-		zombies.Add (c1);
-		zombies.Add (c2);
 */
+
 
 	}
 	
@@ -81,5 +77,70 @@ public class GameController : MonoBehaviour {
 	
 	}
 
+	public Vector3 setStartPosition(Zombie zombie){
+
+		Lane lane = (Lane)Random.Range ((int)Lane.INNER, (int)Lane.OUTTER + 1);
+		
+		float x = ilb.transform.position.x;
+		float y = ilb.transform.position.z;
+		float xRange = Vector3.Distance(ilb.transform.position , irb.transform.position);
+		float yRange = Vector3.Distance(ilb.transform.position, ilt.transform.position);
+		
+		if (lane == Lane.MID) {
+			x = mlb.transform.position.x;
+			y = mlb.transform.position.z;
+			xRange = Vector3.Distance(mlb.transform.position , mrb.transform.position);
+			yRange = Vector3.Distance(mlb.transform.position , mlt.transform.position);
+		} else if (lane == Lane.OUTTER) {
+			x = olb.transform.position.x;
+			y = olb.transform.position.z;
+			xRange = Vector3.Distance(olb.transform.position , orb.transform.position);
+			yRange =Vector3.Distance (olb.transform.position , olt.transform.position);
+			
+		}
+		
+		Side side = (Side)Random.Range ((int)Side.LEFT, (int) (int)Side.TOP +1);
+		while(side==Side.RIGHT)
+			side = (Side)Random.Range ((int)Side.LEFT, (int) (int)Side.TOP +1);
+
+		zombie.lane = lane;
+		zombie.side = side;
+		zombie.setGoal();
+
+		switch (side) {
+			//left
+		case(Side.LEFT):
+			y += Random.Range (0,yRange);
+			break;
+			//bottom
+		case(Side.BOTTOM):
+			x += Random.Range(0,xRange);
+			break;
+			//right
+		case(Side.RIGHT):
+			x+=xRange;
+			y+= Random.Range(0,yRange);
+			break;
+			//top
+		case(Side.TOP):
+			y+=yRange;
+			x+= Random.Range(0,xRange);
+			break;
+			
+		default:
+			break;
+		}
+		Vector3 pos = new Vector3 (x, 0, y);
+		foreach(Zombie z in zombies){
+			if(z.lane == lane){
+				if(Vector3.Distance(pos,z.transform.position) < 1 )
+				{
+					pos = setStartPosition(zombie);
+					break;
+				}
+			}
+		}
+		return pos;
+	}
 
 }

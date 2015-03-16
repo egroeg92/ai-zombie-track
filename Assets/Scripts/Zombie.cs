@@ -22,13 +22,21 @@ public abstract class Zombie : MonoBehaviour {
 
 	public float speed = 1.0f;
 	int spawnProb;
-	int ratio;
+	float ratio;
 	bool easy;
 	public Lane lane;
 	public Side side;
+
+	public Vector3 forward;
 	// Use this for initialization
 	protected void Start () {
+
 		game = GameObject.Find("Level").GetComponent<GameController> ();
+
+
+		game.zombies.Add (this);
+		zombies = game.zombies;
+
 		casual = game.casual;
 		shambler = game.shambler;
 		modern = game.modern;
@@ -65,124 +73,93 @@ public abstract class Zombie : MonoBehaviour {
 		corners [9] = irb;
 		corners [10] = mrb;
 		corners [11] = orb;
-
+		
 		setSide ();
+		setForward ();
 		setGoal ();
+
 		
 	}
-
-	public void setStartPosition(){
-		game = GameObject.Find("Level").GetComponent<GameController> ();
-
-		lane = (Lane)Random.Range ((int)Lane.INNER, (int)Lane.OUTTER + 1);
-
-		float x = game.ilb.transform.position.x;
-		float y = game.ilb.transform.position.z;
-		float xRange = Vector3.Distance(game.ilb.transform.position , game.irb.transform.position);
-		float yRange = Vector3.Distance(game.ilb.transform.position, game.ilt.transform.position);
-		
-		if (lane == Lane.MID) {
-			x = game.mlb.transform.position.x;
-			y = game.mlb.transform.position.z;
-			xRange = Vector3.Distance(game.mlb.transform.position , game.mrb.transform.position);
-			yRange = Vector3.Distance(game.mlb.transform.position , game.mlt.transform.position);
-		} else if (lane == Lane.OUTTER) {
-			x = game.olb.transform.position.x;
-			y = game.olb.transform.position.z;
-			xRange = Vector3.Distance(game.olb.transform.position , game.orb.transform.position);
-			yRange =Vector3.Distance (game.olb.transform.position , game.olt.transform.position);
-			
+	public void setForward()
+	{
+		if (side == Side.LEFT) {
+			if (dir == Dirrection.CCW)
+				forward = new Vector3 (0, 0, -1);
+			else
+				forward = new Vector3 (0, 0, 1);
+		} else if (side == Side.BOTTOM) {
+			if (dir == Dirrection.CCW)
+				forward = new Vector3 (1, 0, 0);
+			else
+				forward = new Vector3 (-1, 0, 0);
+		} else if (side == Side.RIGHT) {
+			if (dir == Dirrection.CCW)
+				forward = new Vector3 (0, 0, 1);
+			else
+				forward = new Vector3 (0, 0, -1);
+		} else {
+			if (dir == Dirrection.CCW)
+				forward = new Vector3 (-1, 0, 0);
+			else 
+				forward = new Vector3 (1, 0, 0);
 		}
-		
-		side = (Side)Random.Range ((int)Side.LEFT, (int) (int)Side.TOP +1);
-		while(side==Side.RIGHT)
-			side = (Side)Random.Range ((int)Side.LEFT, (int) (int)Side.TOP +1);
-		
-		
-		switch (side) {
-			//left
-		case(Side.LEFT):
-			y += Random.Range (0,yRange);
-			break;
-			//bottom
-		case(Side.BOTTOM):
-			x += Random.Range(0,xRange);
-			break;
-			//right
-		case(Side.RIGHT):
-			x+=xRange;
-			y+= Random.Range(0,yRange);
-			break;
-			//top
-		case(Side.TOP):
-			y+=yRange;
-			x+= Random.Range(0,xRange);
-			break;
-			
-		default:
-			break;
-		}
-		transform.position = new Vector3 (x, 0, y);
 	}
-	void setSide(){
 
-		if (transform.position == ilt.transform.position) {
+	public void setSide(){
+
+		if (transform.position == game.ilt.transform.position) {
 			side = Side.LEFT;
 			lane = Lane.INNER;
-		}else if(transform.position == mlt.transform.position){
+		}else if(transform.position == game.mlt.transform.position){
 			side = Side.LEFT;
 			lane = Lane.MID;
 			
-		}else if(transform.position == olt.transform.position){
+		}else if(transform.position == game.olt.transform.position){
 			side = Side.LEFT;
 			lane = Lane.OUTTER;
 			
-		}else if(transform.position == irt.transform.position){
+		}else if(transform.position == game.irt.transform.position){
 			side = Side.TOP;
 			lane = Lane.INNER;
 			
-		}else if(transform.position == mrt.transform.position){
+		}else if(transform.position == game.mrt.transform.position){
 			side = Side.TOP;
 			lane = Lane.MID;
 			
-		}else if(transform.position == ort.transform.position){
+		}else if(transform.position == game.ort.transform.position){
 			side = Side.TOP;
 			lane = Lane.OUTTER;
 			
 			
-		}else if(transform.position == ilb.transform.position){
+		}else if(transform.position == game.ilb.transform.position){
 			side = Side.BOTTOM;
 			lane = Lane.INNER;
 			
-		}else if(transform.position == mlb.transform.position){
+		}else if(transform.position == game.mlb.transform.position){
 			side = Side.BOTTOM;
 			lane = Lane.MID;
 			
-		}else if(transform.position == olb.transform.position){
+		}else if(transform.position == game.olb.transform.position){
 			side = Side.BOTTOM;
 			lane = Lane.OUTTER;
 			
-		}else if(transform.position == irb.transform.position){
+		}else if(transform.position == game.irb.transform.position){
 			side = Side.RIGHT;
 			lane = Lane.INNER;
 			
-		}else if(transform.position == mrb.transform.position){
+		}else if(transform.position == game.mrb.transform.position){
 			side = Side.RIGHT;
 			lane = Lane.MID;
 			
-		}else if(transform.position == orb.transform.position){
+		}else if(transform.position == game.orb.transform.position){
 			side = Side.RIGHT;
 			lane = Lane.OUTTER;
 			
 			
 		}
-		if (transform.position == ilt.transform.position) {
-			side = Side.LEFT;
-			lane = Lane.INNER;
-		}
 	}
 
-	protected void setGoal(){
+	public void setGoal(){
 		switch (side) {
 			//left
 		case(Side.LEFT):
@@ -278,31 +255,38 @@ public abstract class Zombie : MonoBehaviour {
 
 	// Update is called once per frame
 	protected void Update () {
+
 		zombies = game.zombies;
 		FSM ();
 	}
 	void LateUpdate(){
 		if (destroyFlag) {
-			game.zombies.Remove (this);
-			Destroy (this.gameObject);
 			if(easy)
 				game.easies -= 1;
 			else
 				game.hards -= 1;
-			spawnNew();
-			
 
+
+			game.zombies.Remove (this);
+			spawnNew();
+
+			Destroy (this.gameObject);
 			Destroy (this);
+
+
 		}
 	}
 	void spawnNew(){
 		int easies = game.easies;
 		int hards = game.hards;
-		int ratio = game.easyToHardRatio;
+		ratio = game.easyToHardRatio;
 
 		GameObject startCorner = (corners [Random.Range (0, corners.Length)]);
+		//TODO
 		while (startCorner == goalCorner)
 			startCorner = (corners [Random.Range (0, corners.Length)]);
+
+
 		Vector3 start = startCorner.transform.position;
 		Zombie z;
 		if (ratio == 0) {
@@ -330,7 +314,6 @@ public abstract class Zombie : MonoBehaviour {
 				z = Instantiate(shambler,start,Quaternion.identity)as Shambler;
 			}
 		}
-		game.zombies.Add (z);
 
 	}
 
@@ -371,6 +354,7 @@ public abstract class Zombie : MonoBehaviour {
 					break;
 
 				}
+				setForward();
 				setGoal ();
 			}
 			else{

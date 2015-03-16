@@ -58,6 +58,7 @@ public class Phone : Zombie {
 				dir = Dirrection.CW;
 			else
 				dir = Dirrection.CCW;
+			setForward();
 			setGoal();
 		}
 		if (Time.time > nextSpeedShift) {
@@ -93,15 +94,25 @@ public class Phone : Zombie {
 		foreach (Zombie z in zombies) {
 			if(z == this)
 				continue;
-			if(Vector3.Distance(transform.position, z.transform.position) < 2.5f && lane == z.lane)
+
+			float dist = Vector3.Distance(transform.position, z.transform.position);
+
+			if(dist < 2 && lane == z.lane )
 			{
-				if(!shiftLane()){
-					dir = z.dir;
-					setGoal();
-					speed = z.speed;
+				if(!shiftLane())
+				{
+
+					if( z.speed <= 2 * game.speed)
+					{
+						nextDirShift = Time.time + dirShiftFrequency;
+						dir = z.dir;
+						setForward();
+						speed = z.speed;
+					}
+
 				}
-				
 			}
+
 		}
 	}
 }
