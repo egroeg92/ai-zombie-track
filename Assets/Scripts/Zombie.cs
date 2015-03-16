@@ -281,8 +281,20 @@ public abstract class Zombie : MonoBehaviour {
 		int hards = game.hards;
 		ratio = game.easyToHardRatio;
 
-		GameObject startCorner = (corners [Random.Range (0, corners.Length)]);
-		//TODO
+		int cornerIndex = Random.Range (0, corners.Length);
+
+		// ensure zombies positions are non-overlapping
+		GameObject startCorner = (corners [cornerIndex]);
+		int zombieIndex = 0;
+		for(int i = 0; i < zombies.Count ; i ++) {
+			Zombie zo = (Zombie)zombies[i];
+			if(Vector3.Distance(zo.transform.position ,startCorner.transform.position) <= 1)
+			{
+				cornerIndex = (cornerIndex + 1)%corners.Length;
+				startCorner = corners[cornerIndex];
+				i = 0;
+			}
+		}
 		while (startCorner == goalCorner)
 			startCorner = (corners [Random.Range (0, corners.Length)]);
 

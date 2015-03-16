@@ -21,6 +21,8 @@ public class GameController : MonoBehaviour {
 	irb,mrb,orb;
 
 	public ArrayList zombies;
+	ArrayList startPositions;
+
 	// Use this for initialization
 	void Start () {
 		zombies = new ArrayList ();
@@ -40,20 +42,18 @@ public class GameController : MonoBehaviour {
 		mrb = GameObject.FindGameObjectWithTag ("midRB");
 		orb = GameObject.FindGameObjectWithTag ("outterRB");
 
+		startPositions = new ArrayList();
 		for (int i = 0; i < numberOfZombies; i++) {
 			Zombie z;
 
 			if (Random.Range (0, 1f) > 0f) {
 				z = Instantiate (casual,Vector3.zero,Quaternion.identity) as Casual;
-				z.transform.position = setStartPosition(z);
+				while(!setStartPosition(z));
 				z.name = i+" zomb";
 			} else {
 				z = Instantiate (shambler,Vector3.zero,Quaternion.identity) as Shambler;
-
-				z.transform.position = setStartPosition(z);
-
+				while(!setStartPosition(z));
 			}
-			//zombies.Add (z);
 		}
 
 /*
@@ -77,7 +77,7 @@ public class GameController : MonoBehaviour {
 	
 	}
 
-	public Vector3 setStartPosition(Zombie zombie){
+	public bool setStartPosition(Zombie zombie){
 
 		Lane lane = (Lane)Random.Range ((int)Lane.INNER, (int)Lane.OUTTER + 1);
 		
@@ -131,16 +131,16 @@ public class GameController : MonoBehaviour {
 			break;
 		}
 		Vector3 pos = new Vector3 (x, 0, y);
-		foreach(Zombie z in zombies){
-			if(z.lane == lane){
-				if(Vector3.Distance(pos,z.transform.position) < 1 )
-				{
-					pos = setStartPosition(zombie);
-					break;
-				}
+
+		foreach (Vector3 p in startPositions) {
+			if(Vector3.Distance(pos,p) < 1 )
+			{
+				return false;
 			}
 		}
-		return pos;
+		startPositions.Add (pos);
+		zombie.transform.position = pos;
+		return true;
 	}
 
 }
