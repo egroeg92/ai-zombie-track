@@ -3,10 +3,8 @@ guid: 1b9f66095d2e22d46a9c4b78344e33ef
 MonoImporter:
   serializedVersion: 2
   defaultReferences:
-  - casual: {fileID: 11472110, guid: 2de50b626cf98a84086ad648f2adbb87, type: 2}
-  - shambler: {fileID: 11410542, guid: efc029bfa3189e24482766b983f5495f, type: 2}
-  - modern: {fileID: 11433350, guid: ac0025a05da6d904ebf4ea86b5c6d6b6, type: 2}
-  - phone: {fileID: 11464448, guid: 7cdf7b984fa8e8a46a5170db31aa4f5c, type: 2}
+  - goalCorner: {instanceID: 0}
+  - visionPre: {fileID: 11420880, guid: b44b233babca4cb4dbded49482d4707e, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

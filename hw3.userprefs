@@ -1,14 +1,15 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GameController.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Zombie.cs">
     <Files>
-      <File FileName="Assets\Scripts\Zombie.cs" Line="80" Column="1" />
-      <File FileName="Assets\Scripts\Shambler.cs" Line="53" Column="12" />
-      <File FileName="Assets\Scripts\GameController.cs" Line="86" Column="3" />
-      <File FileName="Assets\Scripts\Phone.cs" Line="100" Column="10" />
-      <File FileName="Assets\Scripts\Modern.cs" Line="39" Column="17" />
-      <File FileName="Assets\Scripts\Casual.cs" Line="18" Column="1" />
+      <File FileName="Assets\Scripts\Zombie.cs" Line="369" Column="13" />
+      <File FileName="Assets\Scripts\Shambler.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Phone.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Modern.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Casual.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Enums.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\zombieVision.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

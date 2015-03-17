@@ -14,13 +14,16 @@ public class GameController : MonoBehaviour {
 	public float speed;
 
 	public int easies, hards;
+	public float forwardRange, sideRange,backRange;
 
 	public GameObject  ilt,mlt,olt,
 	irt,mrt,ort,
 	ilb,mlb,olb,
 	irb,mrb,orb;
 
+	public Survivor survivor;
 	public ArrayList zombies;
+	public bool seen = false;
 	ArrayList startPositions;
 
 	// Use this for initialization
@@ -46,7 +49,7 @@ public class GameController : MonoBehaviour {
 		for (int i = 0; i < numberOfZombies; i++) {
 			Zombie z;
 
-			if (Random.Range (0, 1f) > 0f) {
+			if (Random.Range (0, 1f) > 0.5f) {
 				z = Instantiate (casual,Vector3.zero,Quaternion.identity) as Casual;
 				while(!setStartPosition(z));
 				z.name = i+" zomb";
