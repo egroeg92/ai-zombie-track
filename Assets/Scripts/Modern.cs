@@ -4,7 +4,7 @@ using System.Collections;
 public class Modern : Zombie {
 
 	// Use this for initialization
-	void Start () {
+	new void Start () {
 
 		base.Start ();
 		base.setEasy (false);
@@ -12,7 +12,7 @@ public class Modern : Zombie {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	new void Update () {
 		base.Update ();
 		
 		speed = 2 * game.speed;

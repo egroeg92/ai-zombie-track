@@ -33,7 +33,8 @@ public abstract class Zombie : MonoBehaviour {
 	GameObject vision;
 
 	bool seen; 
-
+	float forwardRange,backRange, sideRange;
+	Vector3 lower;
 	// Use this for initialization
 	protected void Start () {
 
@@ -41,15 +42,18 @@ public abstract class Zombie : MonoBehaviour {
 		game.zombies.Add (this);
 		seen = game.seen;
 
-		float forwardRange = game.forwardRange + (transform.localScale/2).z;
-		float sideRange = game.sideRange + (transform.localScale/2).x;
-		float backRange = game.backRange + (transform.localScale/2).z;
+		forwardRange = game.forwardRange ;
+		sideRange = game.sideRange ;
+		backRange = game.backRange ;
 
 		vision = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		vision.transform.localScale = new Vector3 (transform.localScale.x+game.forwardRange + game.backRange, 1, 3 * game.sideRange);
-
+		vision.transform.localScale = new Vector3 (vision.transform.localScale.x+forwardRange + backRange, .1f, 3 * sideRange);
+		lower = new Vector3 (0, -.5f, 0);
+		vision.collider.isTrigger = true;
+		//Destroy(vision.GetComponent<Collider>());
 		//vision.renderer.enabled = false;
 		vision.renderer.material = renderer.material;
+		vision.name = "vision";
 		zombies = game.zombies;
 
 		casual = game.casual;
@@ -287,7 +291,7 @@ public abstract class Zombie : MonoBehaviour {
 
 		zombies = game.zombies;
 		FSM ();
-		vision.transform.position = transform.position + (forward * 3);
+		vision.transform.position = transform.position + (forward * 3) + lower;
 		vision.transform.rotation = Quaternion.LookRotation(right) ;
 
 
@@ -303,6 +307,7 @@ public abstract class Zombie : MonoBehaviour {
 			game.zombies.Remove (this);
 			spawnNew();
 
+			Destroy (vision);
 			Destroy (this.gameObject);
 			Destroy (this);
 
@@ -317,7 +322,6 @@ public abstract class Zombie : MonoBehaviour {
 
 		// ensure zombies positions are non-overlapping
 		GameObject startCorner = (corners [cornerIndex]);
-		int zombieIndex = 0;
 		for(int i = 0; i < zombies.Count ; i ++) {
 			Zombie zo = (Zombie)zombies[i];
 			if(Vector3.Distance(zo.transform.position ,startCorner.transform.position) <= 1)
@@ -368,7 +372,7 @@ public abstract class Zombie : MonoBehaviour {
 		} else {
 			isVisible(game.survivor.gameObject);
 			//TODO SWARM
-			Debug.Log ("SWARM");
+		//	Debug.Log ("SWARM");
 		}
 		seen = game.seen;
 		transform.position = Vector3.MoveTowards (transform.position, goalCorner.transform.position, speed * Time.deltaTime);
@@ -495,6 +499,10 @@ public abstract class Zombie : MonoBehaviour {
 	}
 
 	public bool isVisible(GameObject surv){
+
+		
+
+
 		return vision.collider.bounds.Intersects (surv.collider.bounds);
 
 	}

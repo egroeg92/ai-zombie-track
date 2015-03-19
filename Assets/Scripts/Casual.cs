@@ -4,13 +4,13 @@ using System.Collections;
 public class Casual : Zombie {
 
 	// Use this for initialization
-	void Start () {
+	new void Start () {
 		base.Start ();
 		base.setEasy (true);
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	new void Update () {
 		base.Update ();
 		speed = game.speed;
 		avoidCollision ();

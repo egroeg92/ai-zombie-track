@@ -7,10 +7,8 @@ public class Shambler : Zombie {
 	float nextShift ;
 
 
-	float startTime;
 	// Use this for initialization
-	void Start () {
-		startTime = Time.time;
+	new void Start () {
 		base.Start ();
 		base.setEasy (true);
 		speed = speed / 2;
@@ -20,7 +18,7 @@ public class Shambler : Zombie {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	new void Update () {
 		base.Update ();
 
 		if (Time.time > nextShift) {

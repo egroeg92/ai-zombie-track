@@ -23,7 +23,7 @@ public class Phone : Zombie {
 	float nextSpeedShift;
 
 	// Use this for initialization
-	void Start () {
+	new void Start () {
 		base.Start ();
 		base.setEasy (false);
 		speedMin = speed / 2;
@@ -43,7 +43,7 @@ public class Phone : Zombie {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	new void Update () {
 		base.Update ();
 
 		if (Time.time > nextLaneShift) {
@@ -107,6 +107,7 @@ public class Phone : Zombie {
 						nextDirShift = Time.time + dirShiftFrequency;
 						dir = z.dir;
 						setForward();
+						setGoal();
 						speed = z.speed;
 					}
 

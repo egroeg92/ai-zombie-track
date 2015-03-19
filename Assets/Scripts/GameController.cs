@@ -21,6 +21,11 @@ public class GameController : MonoBehaviour {
 	ilb,mlb,olb,
 	irb,mrb,orb;
 
+	public GameObject[] golds;
+	public GameObject goal;
+	public GameObject start;
+
+
 	public Survivor survivor;
 	public ArrayList zombies;
 	public bool seen = false;
@@ -45,6 +50,13 @@ public class GameController : MonoBehaviour {
 		mrb = GameObject.FindGameObjectWithTag ("midRB");
 		orb = GameObject.FindGameObjectWithTag ("outterRB");
 
+		golds = GameObject.FindGameObjectsWithTag ("gold");
+		goal = GameObject.FindGameObjectWithTag ("goal");
+		start = GameObject.FindGameObjectWithTag ("start");
+
+		survivor = Instantiate (survivor, start.transform.position, Quaternion.identity) as Survivor;
+
+
 		startPositions = new ArrayList();
 		for (int i = 0; i < numberOfZombies; i++) {
 			Zombie z;
@@ -52,10 +64,11 @@ public class GameController : MonoBehaviour {
 			if (Random.Range (0, 1f) > 0.5f) {
 				z = Instantiate (casual,Vector3.zero,Quaternion.identity) as Casual;
 				while(!setStartPosition(z));
-				z.name = i+" zomb";
+				z.name = "cas";
 			} else {
 				z = Instantiate (shambler,Vector3.zero,Quaternion.identity) as Shambler;
 				while(!setStartPosition(z));
+				z.name = "shamb";
 			}
 		}
 
@@ -145,5 +158,6 @@ public class GameController : MonoBehaviour {
 		zombie.transform.position = pos;
 		return true;
 	}
+
 
 }
