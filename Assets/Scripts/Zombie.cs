@@ -30,9 +30,12 @@ public abstract class Zombie : MonoBehaviour {
 	public Vector3 forward;
 	public Vector3 right;
 
-	GameObject vision;
+	public GameObject vision;
+	public Material isSeen;
+	Material notSeen;
 
-	bool seen; 
+	bool survSeen;
+	public bool seen;
 	float forwardRange,backRange, sideRange;
 	Vector3 lower;
 	// Use this for initialization
@@ -40,20 +43,21 @@ public abstract class Zombie : MonoBehaviour {
 
 		game = GameObject.Find("Level").GetComponent<GameController> ();
 		game.zombies.Add (this);
-		seen = game.seen;
-
+		survSeen = game.seen;
+		seen = false;
 		forwardRange = game.forwardRange ;
 		sideRange = game.sideRange ;
 		backRange = game.backRange ;
 
 		vision = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		vision.transform.localScale = new Vector3 (vision.transform.localScale.x+forwardRange + backRange, .1f, 3 * sideRange);
-		lower = new Vector3 (0, -.5f, 0);
+		vision.transform.localScale = new Vector3 (vision.transform.localScale.x+forwardRange + backRange, 1, 3 * sideRange);
+		lower = new Vector3 (0, -0.5f, 0);
 		vision.collider.isTrigger = true;
 		//Destroy(vision.GetComponent<Collider>());
 		//vision.renderer.enabled = false;
 		vision.renderer.material = renderer.material;
 		vision.name = "vision";
+		notSeen = renderer.material;
 		zombies = game.zombies;
 
 		casual = game.casual;
@@ -62,7 +66,7 @@ public abstract class Zombie : MonoBehaviour {
 		phone = game.phone;
 
 		spawnProb = game.respawnProbabilty;
-		ratio = game.easyToHardRatio;
+		ratio = game.hardToEasyRatio;
 		speed = game.speed;
 		ilt = game.ilt;
 		mlt = game.mlt;
@@ -288,13 +292,19 @@ public abstract class Zombie : MonoBehaviour {
 
 	// Update is called once per frame
 	protected void Update () {
-
+//		Debug.Log (name + " forward  = "+forward);
 		zombies = game.zombies;
 		FSM ();
 		vision.transform.position = transform.position + (forward * 3) + lower;
 		vision.transform.rotation = Quaternion.LookRotation(right) ;
 
 
+	}
+	public void isVisable(){
+		if (seen) {
+			renderer.material = isSeen;
+		} else
+			renderer.material = notSeen;
 	}
 	void LateUpdate(){
 		if (destroyFlag) {
@@ -314,9 +324,9 @@ public abstract class Zombie : MonoBehaviour {
 		}
 	}
 	void spawnNew(){
-		int easies = game.easies;
-		int hards = game.hards;
-		ratio = game.easyToHardRatio;
+		float easies = game.easies;
+		float hards = game.hards;
+		ratio = game.hardToEasyRatio;
 
 		int cornerIndex = Random.Range (0, corners.Length);
 
@@ -337,6 +347,7 @@ public abstract class Zombie : MonoBehaviour {
 
 		Vector3 start = startCorner.transform.position;
 		Zombie z;
+
 		if (ratio == 0) {
 			if(Random.Range (0, 2) == 1){
 				z = Instantiate(casual,start,Quaternion.identity)as Casual;
@@ -349,7 +360,9 @@ public abstract class Zombie : MonoBehaviour {
 			}else{
 				z = Instantiate(shambler,start,Quaternion.identity)as Phone;
 			}
-		}else if( (easies/hards) >= ratio ){
+
+		}// less hards than ratio create hard
+		else if( (hards/easies) <= ratio ){
 			if(Random.Range (0, 2) == 1){
 				z = Instantiate(modern,start,Quaternion.identity)as Modern;
 			}else{
@@ -366,15 +379,17 @@ public abstract class Zombie : MonoBehaviour {
 	}
 
 	protected void FSM(){
-		if (!seen) {
-			if(isVisible (game.survivor.gameObject))
-				game.seen = true;
+		if (!survSeen) {
+			if(canSee (game.survivor.gameObject))
+			{	game.seen = true;
+				Debug.Log ("SEEN");
+			}	
 		} else {
-			isVisible(game.survivor.gameObject);
+			canSee(game.survivor.gameObject);
 			//TODO SWARM
-		//	Debug.Log ("SWARM");
+			Debug.Log ("SWARM");
 		}
-		seen = game.seen;
+		survSeen = game.seen;
 		transform.position = Vector3.MoveTowards (transform.position, goalCorner.transform.position, speed * Time.deltaTime);
 
 
@@ -498,12 +513,102 @@ public abstract class Zombie : MonoBehaviour {
 		
 	}
 
-	public bool isVisible(GameObject surv){
-
-		
-
+	public bool canSee(GameObject surv){
 
 		return vision.collider.bounds.Intersects (surv.collider.bounds);
+
+	}
+	public bool isFacing(Vector3 obj){
+
+		Vector3 targetDir = obj - transform.position;
+
+		float angle = Vector3.Angle(targetDir, forward);
+		if(angle < 75)
+			return true;
+		return false;
+	}
+
+	public bool isLeft(GameObject obj){
+		if (dir == Dirrection.CW) {
+			if (side == Side.LEFT) {
+				if (obj.transform.position.x + obj.transform.localScale.x / 2 <= transform.position.x - transform.localScale.x / 2 - sideRange) {
+					return true;
+				}
+			} else if (side == Side.RIGHT) {
+				if (obj.transform.position.x - obj.transform.localScale.x / 2 >= transform.position.x + transform.localScale.x / 2 + sideRange) {
+					return true;
+				}
+			} else if (side == Side.TOP) {
+				if (obj.transform.position.z - obj.transform.localScale.z / 2 >= transform.position.z + transform.localScale.z / 2 + sideRange) {
+					return true;
+				}
+			} else {
+				if (obj.transform.position.z + obj.transform.localScale.z / 2 <= transform.position.z - transform.localScale.z / 2 - sideRange) {
+					return true;
+				}
+			}
+		} else {
+			if (side == Side.RIGHT) {
+				if (obj.transform.position.x + obj.transform.localScale.x / 2 <= transform.position.x - transform.localScale.x / 2 - sideRange) {
+					return true;
+				}
+			} else if (side == Side.LEFT) {
+				if (obj.transform.position.x - obj.transform.localScale.x / 2 >= transform.position.x + transform.localScale.x / 2 + sideRange) {
+					return true;
+				}
+			} else if (side == Side.BOTTOM) {
+				if (obj.transform.position.z - obj.transform.localScale.z / 2 >= transform.position.z + transform.localScale.z / 2 + sideRange) {
+					return true;
+				}
+			} else {
+				if (obj.transform.position.z + obj.transform.localScale.z / 2 <= transform.position.z - transform.localScale.z / 2 - sideRange) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	public bool isRight(GameObject obj){
+
+		if (dir == Dirrection.CCW) {
+			if (side == Side.LEFT) {
+				if (obj.transform.position.x + obj.transform.localScale.x / 2 <= transform.position.x - transform.localScale.x / 2 - sideRange) {
+					return true;
+				}
+			} else if (side == Side.RIGHT) {
+				if (obj.transform.position.x - obj.transform.localScale.x / 2 >= transform.position.x + transform.localScale.x / 2 + sideRange) {
+
+					return true;
+				}
+			} else if (side == Side.TOP) {
+				if (obj.transform.position.z - obj.transform.localScale.z / 2 >= transform.position.z + transform.localScale.z / 2 + sideRange) {
+					return true;
+				}
+			} else {
+				if (obj.transform.position.z + obj.transform.localScale.z / 2 <= transform.position.z - transform.localScale.z / 2 - sideRange) {
+					return true;
+				}
+			}
+		} else {
+			if (side == Side.RIGHT) {
+				if (obj.transform.position.x + obj.transform.localScale.x / 2 <= transform.position.x - transform.localScale.x / 2 - sideRange) {
+					return true;
+				}
+			} else if (side == Side.LEFT) {
+				if (obj.transform.position.x - obj.transform.localScale.x / 2 >= transform.position.x + transform.localScale.x / 2 + sideRange) {
+					return true;
+				}
+			} else if (side == Side.BOTTOM) {
+				if (obj.transform.position.z - obj.transform.localScale.z / 2 >= transform.position.z + transform.localScale.z / 2 + sideRange) {
+					return true;
+				}
+			} else {
+				if (obj.transform.position.z + obj.transform.localScale.z / 2 <= transform.position.z - transform.localScale.z / 2 - sideRange) {
+					return true;
+				}
+			}
+		}
+		return false;
 
 	}
 	protected abstract void avoidCollision();

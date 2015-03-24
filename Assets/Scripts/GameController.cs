@@ -6,14 +6,15 @@ public class GameController : MonoBehaviour {
 	public Shambler shambler;
 	public Modern modern;
 	public Phone phone;
+	public Survivor survivor;
 
 
 	public int numberOfZombies;
-	public float easyToHardRatio;
+	public float hardToEasyRatio;
 	public int respawnProbabilty;
 	public float speed;
 
-	public int easies, hards;
+	public float easies, hards;
 	public float forwardRange, sideRange,backRange;
 
 	public GameObject  ilt,mlt,olt,
@@ -26,7 +27,6 @@ public class GameController : MonoBehaviour {
 	public GameObject start;
 
 
-	public Survivor survivor;
 	public ArrayList zombies;
 	public bool seen = false;
 	ArrayList startPositions;

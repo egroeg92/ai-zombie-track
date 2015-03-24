@@ -8,69 +8,94 @@ public class Survivor : MonoBehaviour {
 	ArrayList golds;
 	ArrayList zombies;
 	ArrayList visableZombies;
+	ArrayList dangerousZombies;
+	GameObject[] alcoves;
 
-	float speed;
+
+	float maxSpeed;
 
 	public GameObject currentGoal;
 	Tile subGoal;
 
 
+	Vector3 lastPos;
+	Vector3 velocity;
 
 	public Vector3 forward;
-	public Vector3 right;
-	public Vector3 left;
-
-	Vector3 lasPos;
+	public Vector3 rForward;
+	public Vector3 lForward;
+	public Vector3 evadeDir;
+	
+	bool hide;
 
 	Tile currentTile;
 	int tileX,tileY;
 	Tile[,] tiles;
 
-	Stack path;
+	GameObject vision;
+	public float visionRadius = 3;
+
+	NavMeshPath path;
+	NavMeshAgent agent;
+
+	Side side;
+
 	// Use this for initialization
 	void Start () {
 		game = GameObject.Find ("Level").GetComponent<GameController> ();
-		gameObject.AddComponent<Rigidbody> ();
+
+		//gameObject.AddComponent<Rigidbody> ();
 		gameObject.rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 		gameObject.rigidbody.freezeRotation = true;
 
 		zombies = game.zombies;
 		visableZombies = new ArrayList ();
+		dangerousZombies = new ArrayList ();
 		golds = new ArrayList ();
 		golds.AddRange(game.golds);
 		goal = game.goal;
+		golds.Add (goal);
 
-		speed = game.speed * 1.5f;
+		alcoves = GameObject.FindGameObjectsWithTag ("alcove");
+
+		maxSpeed = game.speed * 1.5f;
 
 		forward = transform.forward;
-		discretizeMap ();
-
-		path = new Stack ();
-		//setGoal();
-
+		rForward = (transform.right + transform.forward).normalized;
+		lForward = (-transform.right + transform.forward).normalized;
+		//discretizeMap ();
 
 
-		//Tile t = aStar (currentTile);
-		//setPath (t);
-		//subGoal = (Tile)path.Pop ();
+		vision = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		vision.transform.localScale = new Vector3 (visionRadius, visionRadius, visionRadius);
+		vision.collider.isTrigger = true;
+		vision.renderer.enabled = false;
+		vision.name = "vision";
+
+		path = new NavMeshPath ();
+		hide = false;
+		agent = gameObject.AddComponent<NavMeshAgent> ();
+
+		velocity = Vector3.zero;
+
 	
 	}
 
-	void setPath (Tile t)
-	{
-		while (t.position != currentTile.position) {
-			path.Push (t);
-			t = t.parent;
-		}
-	}
+
 	
 	void Update () {
-		lasPos = transform.position;
+		setSide ();
+		maxSpeed = game.speed * 1.5f;
+		vision.transform.position = transform.position;
+		lastPos = transform.position;
 		zombies = game.zombies;
 
 		evaluateTree ();
+		collect ();
 
+		velocity = transform.position - lastPos;
 
+		//dangerEvalSequence ();
 			
 	}
 	bool evaluateTree(){
@@ -79,12 +104,9 @@ public class Survivor : MonoBehaviour {
 			//selector
 			
 			//check for enemies
-			if(!dangerEvalSequence()){
-				
-				if(!collectGoldSequence()){
-					
-					return search();
-				}
+			if(!dangerEvalSequence() && !hide){
+				Debug.Log ("search");
+				collectGoldSequence();
 			}
 			
 			
@@ -95,9 +117,11 @@ public class Survivor : MonoBehaviour {
 
 	bool dangerEvalSequence()
 	{
+
 		if (enemyInSight ()) {
 			if (inDanger ()) {
-				if (avoid ()) {
+				Debug.Log ("evade");
+				if (evade ()) {
 					return true;
 				}
 			}
@@ -106,88 +130,24 @@ public class Survivor : MonoBehaviour {
 	}
 	bool collectGoldSequence()
 	{
-		if (goalInSight ()) {
-			if (moveTowards ()) {
-				if (inverter (collect ())) {
-					return true;
-				}
-			}
-		}
-		return false;
+		setGoal ();
+		search ();
+		return true;
 	}
 
 	bool search(){
-		Debug.Log ("SEARCH");
 
-
-		forward = transform.forward;
-		right = (transform.right + transform.forward).normalized;
-		left = (-transform.right + transform.forward).normalized;
-		Vector3 backwards = -forward;
-		Vector3 bLeft = -left;
-		Vector3 bRight = -right;
-
-
-		Debug.DrawRay (transform.position , forward * 10, Color.red);
+		agent.CalculatePath(currentGoal.transform.position, path);
 		
-		Debug.DrawRay (transform.position , right * 2, Color.yellow);
-		
-		Debug.DrawRay (transform.position , left  * 2, Color.green);
 
-		RaycastHit f, r, l,b,br,bl;
+		for (int i = 0; i < path.corners.Length-1; i++) {
 
-
-		Physics.Raycast(transform.position, forward ,out f);
-
-		if (f.distance < 1) {
-
-			Physics.Raycast (transform.position, right, out r);
-			Physics.Raycast (transform.position, left, out l);
-
-			if (r.distance > 1 && l.distance > 1) {
-				if (Random.Range (0, 1f) > 0.5f)
-					forward = left;
-				else
-					forward = right;
-			} else if (r.distance < 1 && l.distance > 1) {
-				forward = left;
-			} else if (r.distance > 1 && l.distance < 1) {
-				forward = right;
-			} else {
-				Physics.Raycast (transform.position, bRight, out br);
-				Physics.Raycast (transform.position, bLeft, out bl);
-				Physics.Raycast (transform.position, backwards, out b);
-
-				if (Random.Range (0, 1f) > 0.5f) {
-					if (bl.distance > 1)
-						forward = bLeft;
-					else
-						forward = backwards;
-
-				} else {
-					if (br.distance > 1)
-						forward = bRight;
-					else
-						forward = backwards;
-			
-				}
-			}
-
-		} else {
-
-		//	Random.Range(-5,5);
-		//	forward = Quaternion.AngleAxis(Random.Range (-30,30) ,Vector3.up) * forward;
-
-
+			Debug.DrawLine (path.corners [i], path.corners [i + 1], Color.red);	
 		}
 
-		Debug.Log (forward);
-
-		transform.forward = forward;
-		transform.position = Vector3.MoveTowards (transform.position, transform.position + forward, speed * Time.deltaTime);
-
-		//transform.Translate(forward * speed * Time.deltaTime);
-
+		if(path.corners.Length >= 2){
+			transform.position = Vector3.MoveTowards (transform.position, path.corners [1], maxSpeed * Time.deltaTime);
+		}
 
 		return true;
 	}
@@ -200,28 +160,159 @@ public class Survivor : MonoBehaviour {
 		Vector3 dir;
 
 		foreach (Zombie z in zombies) {
+			z.seen = false;
 			dir = z.transform.position - transform.position;
-
 			Physics.Raycast(transform.position, dir ,out hit);
-			//Debug.Log (hit.transform.gameObject.name);
 			if(hit.transform.gameObject == z.gameObject ){
 				visableZombies.Add(z);
 				inSight = true;
+				z.seen = true;
 			}
+			z.isVisable();
 		}
-		//Debug.Log ("enemies in sight" + (inSight));
 
 		return inSight;
 	}
 
 	bool inDanger(){
-		
-		return true;
+		dangerousZombies.Clear ();
+
+		bool inDanger = false;
+
+		foreach (Zombie z in visableZombies) {
+
+			if (z.isFacing (transform.position) && Vector3.Distance (transform.position, z.transform.position) < 15) {
+				Debug.Log ("in danger");
+				dangerousZombies.Add(z);
+				inDanger = true;
+			
+			} else {
+				if (Vector3.Distance (transform.position, z.transform.position) < 3) {
+					if(!z.isLeft(gameObject) || !z.isRight(gameObject)){
+						dangerousZombies.Add(z);
+						inDanger = true;
+					}
+
+				}
+			}
+
+
+		}
+		return inDanger;
+
 	}
-	bool avoid(){
+	bool evade(){
+//		hide = true;
+		Zombie mostDangerous = dangerousZombies[0] as Zombie;
+		float dist = Vector3.Distance (transform.position, mostDangerous.transform.position);
+
+		foreach (Zombie z in dangerousZombies) {
+			float d = Vector3.Distance (transform.position, z.transform.position);
+			if(d < dist){
+				dist = d;
+				mostDangerous =z ;
+			}
+
+		}
+
+		Vector3 moveDir;
+
+		Vector3 desiredVelocity = (transform.position - mostDangerous.transform.position).normalized * maxSpeed;
+		Vector3 steering = desiredVelocity - velocity;
+		
+		velocity += steering;
+		
+		moveDir = velocity;
+
+
+		if (mostDangerous.name == "cas" || mostDangerous.name == "modern") {
+			//not to right or left
+			Debug.Log ("left "+mostDangerous.isLeft(gameObject));
+			Debug.Log ("right "+mostDangerous.isRight(gameObject));
+
+			if (!mostDangerous.isRight (gameObject) && !mostDangerous.isLeft (gameObject)) {
+				Debug.Log ("not to side!");
+				if (mostDangerous.lane == Lane.OUTTER) {
+					if(mostDangerous.dir == Dirrection.CCW){
+						moveDir = -mostDangerous.right;
+					}else{
+						moveDir = mostDangerous.right;
+					}
+				
+				} else if (mostDangerous.lane == Lane.INNER) {
+					if(mostDangerous.dir == Dirrection.CCW){
+						moveDir = mostDangerous.right;
+					}else{
+						moveDir = -mostDangerous.right;
+					}
+				} else{
+					if(mostDangerous.side == side){
+						moveDir =mostDangerous.right;
+						RaycastHit l,r;
+						Physics.Raycast(transform.position, mostDangerous.right,out r);
+						Physics.Raycast(transform.position, -mostDangerous.right,out l);
+						if(l.distance<r.distance){
+							moveDir = -mostDangerous.right;
+						}
+					}else{
+						if(mostDangerous.side == Side.LEFT )
+							moveDir = new Vector3(1,0,0);
+						else if(mostDangerous.side == Side.BOTTOM)
+							moveDir = new Vector3(0,0,1);
+						else if(mostDangerous.side == Side.RIGHT)
+							moveDir = new Vector3(-1,0,0);
+						
+						else
+							moveDir = new Vector3(0,0,-1);
+
+					}
+				}
+			}
+		} else if (mostDangerous.name == "shamb") {
+			Debug.Log (mostDangerous.side + " "+ side); 
+			if(mostDangerous.isFacing(transform.position)){
+				if(mostDangerous.side == side){
+					moveDir = mostDangerous.forward;
+				}else{
+					if(mostDangerous.side == Side.LEFT )
+						moveDir = new Vector3(1,0,0);
+					else if(mostDangerous.side == Side.BOTTOM)
+						moveDir = new Vector3(0,0,1);
+					else if(mostDangerous.side == Side.RIGHT)
+						moveDir = new Vector3(-1,0,0);
+					
+					else
+						moveDir = new Vector3(0,0,-1);
+
+
+				}
+			}
+			else{
+				moveDir = - mostDangerous.forward;
+			}
+		}
+		transform.position += (moveDir.normalized)*maxSpeed*Time.deltaTime;
 
 		return true;
+
 	}
+
+	Vector3 getClosestAlcove(){
+		Vector3 alcove = transform.position;
+		float dist = float.MaxValue;
+
+		foreach (GameObject a in alcoves) {
+
+			float d = Vector3.Distance (a.transform.position, transform.position);
+			if (d < dist) {
+				dist = d;
+				alcove = a.transform.position;
+			}
+		}
+		return alcove;
+
+	}
+
 	bool inverter(bool b){
 		return !b;
 	}
@@ -236,6 +327,8 @@ public class Survivor : MonoBehaviour {
 				if(currentGoal.collider.bounds.Intersects (collider.bounds))
 					return true;
 			foreach (GameObject g in golds) {
+				if(g == goal && golds.Count != 1)
+					continue;
 				dir = (g.transform.position - transform.position).normalized;
 				//Debug.Log (dir);
 				Physics.Raycast (transform.position, dir, out hit);
@@ -269,32 +362,18 @@ public class Survivor : MonoBehaviour {
 		}
 		return vis;
 	}
-	bool moveTowards(){
-		transform.position = Vector3.MoveTowards (transform.position, currentGoal.transform.position, speed * Time.deltaTime);
-		if (transform.position != currentGoal.transform.position) {
-			transform.forward = (currentGoal.transform.position - transform.position).normalized;
-			forward = transform.forward;
-		}
 
-		forward = transform.forward;
-		right = transform.right + transform.forward;
-		left = -transform.right + transform.forward;
-		
-		Debug.DrawRay (transform.position , forward * 10, Color.red);
-		
-		Debug.DrawRay (transform.position , right * 2, Color.yellow);
-		
-		Debug.DrawRay (transform.position , left  * 2, Color.green);
-
-		return true;
-	}
 	bool collect(){
-		if (transform.position == currentGoal.transform.position) {
-			golds.Remove(currentGoal);
-			Destroy(currentGoal);
-			currentGoal = null;
-			return true;
+		foreach (GameObject g in golds) {
+			if (Vector3.Distance (g.transform.position, transform.position) < .5f) {
+				golds.Remove (g);
+				Destroy (g);
+				if (g == currentGoal)
+					currentGoal = null;
+				return true;
+			}
 		}
+
 
 		return false;
 	}
@@ -304,12 +383,23 @@ public class Survivor : MonoBehaviour {
 	void setGoal()
 	{
 		if (golds.Count == 0)
+			return;
+		else if (golds.Count == 1)
 			currentGoal = goal;
 		else {
+
 			currentGoal = ((GameObject)golds [0]);
+			while(currentGoal == goal)
+					currentGoal = (GameObject)golds[Random.Range (0,golds.Count)];
+				
 			float dist = Vector3.Distance (currentGoal.transform.position, transform.position);
 			foreach (GameObject g in golds) {
+				if(g == goal)
+					continue;
 				float d = Vector3.Distance (g.transform.position, transform.position);
+
+
+
 				if (d < dist) {
 					dist = d;
 					currentGoal = g;
@@ -319,42 +409,7 @@ public class Survivor : MonoBehaviour {
 		}
 	}
 
-	void preAStar(){
-		/*
-		float dist = Vector3.Distance(currentGoal.transform.position,transform.position);
 
-		foreach (GameObject g in golds) {
-			float dist1 = Vector3.Distance(g.transform.position,transform.position);
-			if(dist1 < dist)
-			{
-				currentGoal = g;
-				//might be far from subgoal
-				currentTile = subGoal;
-
-		
-				Tile t = aStar (subGoal);
-		
-				setPath (t);
-			}
-		}
-		if (transform.position != subGoal.position) {
-			transform.position = Vector3.MoveTowards (transform.position, subGoal.position, speed * Time.deltaTime);
-		} else {
-			subGoal = (Tile)path.Pop ();
-		}
-
-		if (transform.position == currentGoal.transform.position) {
-			golds.Remove(currentGoal);
-			setGoal();
-
-			currentTile = subGoal;
-
-			Tile t = aStar (subGoal);
-	
-
-			setPath (t);
-		}*/
-	}
 	Tile aStar(Tile tile){
 		ArrayList openList = new ArrayList ();
 		ArrayList closedList = new ArrayList ();
@@ -404,11 +459,6 @@ public class Survivor : MonoBehaviour {
 				}
 			}
 
-	
-
-
-
-
 		}
 
 	return null;
@@ -449,7 +499,30 @@ public class Survivor : MonoBehaviour {
 
 
 	}
-
+	void setSide(){
+		if (transform.position.x > 28) {
+			side = Side.RIGHT;
+		}else if( transform.position.y > 16 ){
+			side = Side.TOP;
+		}else if(transform.position.y < 5){
+			side = Side.BOTTOM;
+		}else{
+			side = Side.LEFT;
+		}
+	}
+	Side getGoldSide(Vector3 position){
+		Side s;
+		if (position.x > 26) {
+			s = Side.RIGHT;
+		}else if(position.y > 14 ){
+			s = Side.TOP;
+		}else if(position.y < 7){
+			s = Side.BOTTOM;
+		}else{
+			s = Side.LEFT;
+		}
+		return s;
+	}
 
 	float setH(Tile t){
 		t.H =Vector3.Distance (t.position, currentGoal.transform.position);
@@ -481,6 +554,55 @@ public class Survivor : MonoBehaviour {
 	}
 
 
+
+}
+class DangerList{
+	Vector3[] pos;
+	int[] score;
+
+	public DangerList(ArrayList p){
+		pos = new Vector3[p.Count];
+		score = new int[p.Count];
+		int i = 0;
+		foreach (Vector3 v in p) {
+			pos[i] = v;
+			score[i] = 0;
+			i++;
+		}
+	}
+	public Vector3 getHigest(){
+
+		int s = int.MinValue;
+		int index = 0;
+		for(int i = 0 ; i < score.Length; i++) {
+			if(score[i] < s){
+				s = score[i];
+				index = i;
+			}
+
+		}
+		return pos [index];
+	}
+
+	public void changeScore(Vector3 p, int s){
+
+		for(int i = 0 ; i < pos.Length; i++) {
+			if(pos[i] == p){
+				score[i] += s;
+				break;
+			}
+			
+		}
+	}
+	public Vector3[] getPositions(){
+		Vector3[] clone = new Vector3[pos.Length];
+		for (int i = 0; i < pos.Length; i++)
+			clone [i] = pos [i];
+		return clone;
+	}
+
+
+
 }
 
 class Tile{
@@ -496,23 +618,6 @@ class Tile{
 	}
 }
 
-class Tree{
-
-
-}
-
-class Selector{
-	
-}
-class Inverter{
-
-}
-class Sequence{
-
-}
-class Leaf{
-	
-}
 
 
 
