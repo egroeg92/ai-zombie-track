@@ -8,6 +8,9 @@ public class GameController : MonoBehaviour {
 	public Phone phone;
 	public Survivor survivor;
 
+	
+	public Survivor2 s;
+
 
 	public int numberOfZombies;
 	public float hardToEasyRatio;
@@ -55,6 +58,7 @@ public class GameController : MonoBehaviour {
 		start = GameObject.FindGameObjectWithTag ("start");
 
 		survivor = Instantiate (survivor, start.transform.position, Quaternion.identity) as Survivor;
+		//s = Instantiate (s, start.transform.position, Quaternion.identity) as Survivor2;
 
 
 		startPositions = new ArrayList();

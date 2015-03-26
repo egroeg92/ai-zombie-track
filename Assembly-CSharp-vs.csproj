@@ -53,6 +53,7 @@
      <Compile Include="Assets\Scripts\Phone.cs" />
      <Compile Include="Assets\Scripts\Shambler.cs" />
      <Compile Include="Assets\Scripts\Survivor.cs" />
+     <Compile Include="Assets\Scripts\Survivor2.cs" />
      <Compile Include="Assets\Scripts\Zombie.cs" />
      <Compile Include="Assets\Scripts\avoid.cs" />
  <Reference Include="UnityEngine.UI">

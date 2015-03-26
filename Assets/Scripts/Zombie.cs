@@ -387,7 +387,7 @@ public abstract class Zombie : MonoBehaviour {
 		} else {
 			canSee(game.survivor.gameObject);
 			//TODO SWARM
-			Debug.Log ("SWARM");
+		//	Debug.Log ("SWARM");
 		}
 		survSeen = game.seen;
 		transform.position = Vector3.MoveTowards (transform.position, goalCorner.transform.position, speed * Time.deltaTime);
