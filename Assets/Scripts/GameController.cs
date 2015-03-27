@@ -68,27 +68,13 @@ public class GameController : MonoBehaviour {
 			if (Random.Range (0, 1f) > 0.5f) {
 				z = Instantiate (casual,Vector3.zero,Quaternion.identity) as Casual;
 				while(!setStartPosition(z));
-				z.name = "cas";
+				//z.name = "cas";
 			} else {
 				z = Instantiate (shambler,Vector3.zero,Quaternion.identity) as Shambler;
 				while(!setStartPosition(z));
-				z.name = "shamb";
+				//z.name = "shamb";
 			}
 		}
-
-/*
-		Casual c = Instantiate (casual , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Casual;
-		Casual c1 = Instantiate (casual , new Vector3 (2.5f, 0,2.5f),Quaternion.identity) as Casual;
-		Casual c2 = Instantiate (casual , new Vector3 (1.5f, 0,1.5f),Quaternion.identity) as Casual;
-
-		Shambler s = Instantiate (shambler , new Vector3 (3.5f, 0,3.5f),Quaternion.identity) as Shambler;
-		Modern m = Instantiate (modern , new Vector3 (29.5f, 0,17.5f),Quaternion.identity) as Modern;
-
-		Phone p = Instantiate (phone, new Vector3 (29.5f, 0, 3.5f), Quaternion.identity) as Phone;
-		Phone p1 = Instantiate (phone, new Vector3 (30.5f, 0, 2.5f), Quaternion.identity) as Phone;
-		Phone p2 = Instantiate (phone, new Vector3 (31.5f, 0, 1.5f), Quaternion.identity) as Phone;
-*/
-
 
 	}
 	

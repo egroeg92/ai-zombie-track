@@ -7,6 +7,7 @@ public class Casual : Zombie {
 	new void Start () {
 		base.Start ();
 		base.setEasy (true);
+		name = "casual";
 	}
 	
 	// Update is called once per frame

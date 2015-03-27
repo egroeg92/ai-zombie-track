@@ -13,6 +13,7 @@ public class Shambler : Zombie {
 		base.setEasy (true);
 		speed = speed / 2;
 		nextShift = Time.time + shiftFrequency;
+		name="shambler";
 
 		//InvokeRepeating("shiftLane",0, shiftFrequency);
 	}

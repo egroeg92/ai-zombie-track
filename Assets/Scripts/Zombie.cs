@@ -32,12 +32,14 @@ public abstract class Zombie : MonoBehaviour {
 
 	public GameObject vision;
 	public Material isSeen;
+	GameObject seenSphere;
 	Material notSeen;
 
 	bool survSeen;
 	public bool seen;
 	float forwardRange,backRange, sideRange;
 	Vector3 lower;
+
 	// Use this for initialization
 	protected void Start () {
 
@@ -50,13 +52,29 @@ public abstract class Zombie : MonoBehaviour {
 		backRange = game.backRange ;
 
 		vision = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		vision.transform.localScale = new Vector3 (vision.transform.localScale.x+forwardRange + backRange, 1, 3 * sideRange);
+		//vision = Instantiate (vision) as GameObject;
+		vision.transform.localScale = new Vector3 (1+forwardRange + backRange, 1, 3 * sideRange);
+
+	//	Debug.Log (visionLayer);
+	//	vision.layer = 8;
+
 		lower = new Vector3 (0, -0.5f, 0);
 		vision.collider.isTrigger = true;
-		//Destroy(vision.GetComponent<Collider>());
-		//vision.renderer.enabled = false;
+
+		vision.renderer.enabled = false;
+
 		vision.renderer.material = renderer.material;
 		vision.name = "vision";
+
+
+		seenSphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+		seenSphere.transform.localScale = new Vector3 (3, .1f, 3);
+		seenSphere.renderer.material = isSeen;
+		seenSphere.renderer.enabled = false;
+		Destroy (seenSphere.collider);
+
+		gameObject.AddComponent<NavMeshObstacle> ();
+		
 		notSeen = renderer.material;
 		zombies = game.zombies;
 
@@ -297,15 +315,22 @@ public abstract class Zombie : MonoBehaviour {
 		FSM ();
 		vision.transform.position = transform.position + (forward * 3) + lower;
 		vision.transform.rotation = Quaternion.LookRotation(right) ;
-
+		seenSphere.transform.position = transform.position + new Vector3(0,-0.5f,0);
 
 	}
+
 	public void isVisable(){
 		if (seen) {
-			renderer.material = isSeen;
-		} else
-			renderer.material = notSeen;
+			seenSphere.renderer.enabled = true;
+
+		} else{
+			seenSphere.renderer.enabled = false;
+		}
 	}
+
+
+
+
 	void LateUpdate(){
 		if (destroyFlag) {
 			if(easy)
@@ -318,6 +343,7 @@ public abstract class Zombie : MonoBehaviour {
 			spawnNew();
 
 			Destroy (vision);
+			Destroy (seenSphere);
 			Destroy (this.gameObject);
 			Destroy (this);
 
@@ -379,61 +405,64 @@ public abstract class Zombie : MonoBehaviour {
 	}
 
 	protected void FSM(){
+		if(canSee (game.survivor.gameObject))
+			game.seen = true;
+		
+
 		if (!survSeen) {
 			if(canSee (game.survivor.gameObject))
-			{	game.seen = true;
-				Debug.Log ("SEEN");
-			}	
+				game.seen = true;
+			survSeen = game.seen;
+			transform.position = Vector3.MoveTowards (transform.position, goalCorner.transform.position, speed * Time.deltaTime);
+			
+			
+			if (transform.position == goalCorner.transform.position) {
+				//don't spawn new
+				if(Random.Range (0,100) >= spawnProb){
+					switch (side) {
+					case(Side.LEFT):
+						if (dir == Dirrection.CCW)
+							side = Side.BOTTOM;
+						else
+							side = Side.TOP;
+						break;
+						
+					case(Side.BOTTOM):
+						if (dir == Dirrection.CCW)
+							side = Side.RIGHT;
+						else
+							side = Side.LEFT;
+						break;
+						
+					case(Side.RIGHT):
+						if (dir == Dirrection.CCW)
+							side = Side.TOP;
+						else
+							side = Side.BOTTOM;
+						break;
+						
+					case(Side.TOP):
+						if (dir == Dirrection.CCW)
+							side = Side.LEFT;
+						else
+							side = Side.RIGHT;
+						break;
+						
+					}
+					setForward();
+					setGoal ();
+				}
+				else{
+					destroyFlag = true;
+					
+				}
+			}
 		} else {
 			canSee(game.survivor.gameObject);
-			//TODO SWARM
-		//	Debug.Log ("SWARM");
+
+			transform.position = Vector3.MoveTowards(transform.position,game.survivor.transform.position, speed*Time.deltaTime);
 		}
-		survSeen = game.seen;
-		transform.position = Vector3.MoveTowards (transform.position, goalCorner.transform.position, speed * Time.deltaTime);
 
-
-		if (transform.position == goalCorner.transform.position) {
-			//don't spawn new
-			if(Random.Range (0,100) >= spawnProb){
-				switch (side) {
-				case(Side.LEFT):
-					if (dir == Dirrection.CCW)
-						side = Side.BOTTOM;
-					else
-						side = Side.TOP;
-					break;
-				
-				case(Side.BOTTOM):
-					if (dir == Dirrection.CCW)
-						side = Side.RIGHT;
-					else
-						side = Side.LEFT;
-					break;
-
-				case(Side.RIGHT):
-					if (dir == Dirrection.CCW)
-						side = Side.TOP;
-					else
-						side = Side.BOTTOM;
-					break;
-
-				case(Side.TOP):
-					if (dir == Dirrection.CCW)
-						side = Side.LEFT;
-					else
-						side = Side.RIGHT;
-					break;
-
-				}
-				setForward();
-				setGoal ();
-			}
-			else{
-				destroyFlag = true;
-
-			}
-		}
 
 	}
 	protected void setEasy(bool e){
@@ -514,6 +543,8 @@ public abstract class Zombie : MonoBehaviour {
 	}
 
 	public bool canSee(GameObject surv){
+		//Debug.Log (vision.collider.bounds.Intersects (surv.collider.bounds));
+
 
 		return vision.collider.bounds.Intersects (surv.collider.bounds);
 

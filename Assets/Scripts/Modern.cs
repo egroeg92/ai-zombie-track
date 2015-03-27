@@ -9,6 +9,7 @@ public class Modern : Zombie {
 		base.Start ();
 		base.setEasy (false);
 		speed = 2 * speed;
+		name = "modern";
 	}
 	
 	// Update is called once per frame

@@ -40,6 +40,7 @@ public class Phone : Zombie {
 		nextLaneShift = Time.time + laneShiftFrequency;
 		nextDirShift = Time.time + dirShiftFrequency;
 		nextSpeedShift = Time.time + speedShiftFrequency;
+		name = "phone";
 	}
 	
 	// Update is called once per frame
